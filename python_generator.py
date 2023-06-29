@@ -9,14 +9,13 @@ from pathlib import Path
 
 
 
-def build_prompt_template(requirement, license_file):
+def build_prompt_template(requirement):
     """
     Builds the prompt template
     """
     common_implementation_strategy = """
     1. Include the following directories at the root of the repository: "docs", "tests", "code".
     2. Include the following files at the root of the repository: "setup.py", "requirements.txt", "README.md", "LICENSE". These files may be blank to start.
-    3. Update the "LICENSE" file to include the content present inside of the file found locally at this path: "{license_file}"
     3. Update the repository files and directories to meet the specifications outlined in the requirement.
     """
 
@@ -45,25 +44,22 @@ def build_prompt_template(requirement, license_file):
 
     prompt= PromptTemplate(
     input_variables=["common_implementation_strategy",
-                     "requirement", "license_file"],
+                     "requirement"],
     template=prompt_text,
     )
     return prompt.format(common_implementation_strategy=common_implementation_strategy,
-                         requirement=requirement,
-                         license_file=license_file)
+                         requirement=requirement)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate a Python Repository", formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-b','--requirement_file', help='Prompt File Containing Requirements Description', default='prompt-examples/requirement.txt')
-    parser.add_argument('-l','--license_file', help='Prompt File Containing License Information', default='prompt-examples/license.txt')
     parser.add_argument('-m', '--openai_model_name', help='OpenAI Model to use', default='text-davinci-003')
     parser.add_argument('-r', '--run', help='Specify if an actual run should be performed (Send requests to OpenAI). If not specified, will only generate prompt.', dest='run', action='store_true')
     parser.set_defaults(run=False)
     args = parser.parse_args()
 
     requirement = Path(args.requirement_file).read_text()
-    license_file = Path(args.license_file).read_text()
 
     load_dotenv(find_dotenv(filename='.env'))
     # Build prompt
